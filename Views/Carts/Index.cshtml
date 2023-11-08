@@ -1,0 +1,95 @@
+﻿@model IEnumerable<ComputerStore.Models.Cart>
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Your cart</h1>
+@{
+    if (Model.Count() > 0)
+    {
+        <form asp-controller="Carts" asp-action="DeleteAll" method="post">
+            <input type="hidden" name="userId" value="@Model.ElementAt(0).UserId" />
+            <input type="submit" value="Clear cart" />
+        </form>
+    }
+    else
+    {
+        <h3>Your cart is empty. Go to the catalog and add something!</h3>
+    }
+}
+<table class="table">
+    <thead>
+        <tr>
+            <th>№</th>
+            <th>
+                @Html.DisplayNameFor(model => model.Product.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Amount)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Product.Price)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Product.Availability)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            var i = 1;
+        }
+        @foreach (var item in Model) {
+            <tr>
+                <td>@i @{i++;}</td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Product.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Amount)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelIteml => item.Product.Price)
+                </td>
+                <th>
+                    @if (item.Product.Availability)
+                    {
+                        <text>Available</text>
+                    }
+                    else
+                    {
+                        <text>Not Available</text>
+                    }
+                </th>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                    <form asp-controller="Carts" asp-action="DeleteConfirmed" method="post">
+                        <input type="hidden" name="id" value="@item.Id" />
+                        <input type="submit" value="Delete" />
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+@{
+    var total = 0;
+}
+@foreach (var item in Model)
+{
+    total += item.Product.Price * item.Amount;
+}
+<h5>Total price: @total</h5>
+
+@{
+    if (Model.Count() > 0)
+    {
+        <form asp-controller="Orders" asp-action="Create" method="get">
+                    <input type="hidden" name="userId" value="@Model.ElementAt(0).UserId" />
+                    <input type="submit" value="Make order" />
+        </form>
+    }
+}
+<a  asp-route-id=""></a>

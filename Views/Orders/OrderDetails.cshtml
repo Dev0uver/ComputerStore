@@ -1,0 +1,107 @@
+﻿@model ComputerStore.Models.Order
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Order</h4>
+    <hr />
+    <table class="table">
+    <thead>
+        <tr>
+            <th>№</th>
+            <th>
+                Name
+            </th>
+            <th>
+               Amount
+            </th>
+            <th>
+                Price
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+            @{
+                var i = 1;
+            }
+            @foreach (var item in Model.OrderItems)
+            {
+                    <tr>
+                        <td>@i @{
+                            i++;
+                        }</td>
+                        <td>
+                        @item.Product.Name
+                        </td>
+                        <td>
+                        @item.Amount
+                        </td>
+                        <td>
+                        @item.Product.Price
+                        </td>
+                    </tr>
+            }
+    </tbody>
+</table>
+    <dl class="row">
+        <dt class = "col-sm-2">
+            Order Number
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Id)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.User)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.User.UserName)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.OrderStatus)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.OrderStatus)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.OnlinePayment)
+        </dt>
+        <dd class = "col-sm-10">
+            @if (Model.OnlinePayment)
+            {
+                <text>Yes</text>
+            }
+            else
+            {
+                <text>No</text>
+            }
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.PaymentStatus)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.PaymentStatus)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.DeliveryDate)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.DeliveryDate)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Total)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Total)
+        </dd>
+    </dl>
+</div>
+<a asp-action="Search" asp-route-userName="@Model?.User.UserName" class="btn btn-primary">Show all orders from this user</a>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a>
+    <a asp-action="OrdersPanel">Back to List</a>
+</div>
