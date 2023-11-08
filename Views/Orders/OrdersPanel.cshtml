@@ -97,8 +97,16 @@
             </td>
             <td>
                 <a asp-action="OrderDetails" asp-route-id="@item.Id">Details</a> 
+                @if (item.OrderStatus == ComputerStore.Enums.OrderStatus.OnDelivery.ToString())
+                {
+                    <form asp-controller="Orders" asp-action="ConfirmDelivery" method="post">
+                    <input type="hidden" name="id" value="@item.Id" />
+                    <input type="submit" value="Confirm delivery" />
+                </form>
+                }
                 @if (item.OrderStatus != ComputerStore.Enums.OrderStatus.Confirmed.ToString()
-                    && item.OrderStatus != ComputerStore.Enums.OrderStatus.Canceled.ToString())
+                    && item.OrderStatus != ComputerStore.Enums.OrderStatus.Canceled.ToString()
+                    && item.OrderStatus != ComputerStore.Enums.OrderStatus.OnDelivery.ToString())
                 {
                     <form asp-controller="Orders" asp-action="ConfirmOrder" method="post">
                         <input type="hidden" name="id" value="@item.Id" />

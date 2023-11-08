@@ -206,10 +206,6 @@ namespace ComputerStore.Controllers
             orderModel.OrderStatus = OrderStatus.OnDelivery.ToString();
             _context.Update(orderModel);
             _context.SaveChanges();
-
-            orderModel.OrderStatus = OrderStatus.Delivered.ToString();
-            _context.Update(orderModel);
-            _context.SaveChanges();
            
             return RedirectToAction(nameof(Index));
         }
@@ -329,6 +325,20 @@ namespace ComputerStore.Controllers
                 order.PaymentStatus = OrderPaymentStatus.Paid.ToString();
             }
             order.OrderStatus = OrderStatus.Confirmed.ToString();
+
+            _context.Update(order);
+            _context.SaveChanges();
+            return RedirectToAction(nameof(OrdersPanel));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ConfirmDelivery(int id)
+        {
+            var order = await _context.Orders
+                .FirstOrDefaultAsync(o => o.Id == id);
+
+            order.OrderStatus = OrderStatus.Delivered.ToString();
 
             _context.Update(order);
             _context.SaveChanges();
