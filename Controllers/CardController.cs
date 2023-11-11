@@ -5,10 +5,11 @@ using ComputerStore.Models;
 using ComputerStore.Data;
 using ComputerStore.Enums;
 using System.Drawing.Text;
+using Microsoft.AspNetCore.Authorization;
 
+[Authorize]
 public class CardController : Controller
 {
-
     public IActionResult CardInput(Order order)
     {
         Temp.Order = order;

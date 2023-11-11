@@ -1,0 +1,48 @@
+﻿@model IEnumerable<ComputerStore.Models.Product>
+
+@if (Model != null && Model.Count() > 0)
+{
+    long total = 0;
+    int productTotal = 0;
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Product Name</th>
+                    <th>Amount Sold</th>
+                    <th>The amount of product sales</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var product in Model)
+            {
+                productTotal = 0;
+                        <tr>
+                        <td>@product.Name</td>
+                        <td>@product.Amount</td>
+                        <td>@{
+                            productTotal += product.Amount * product.Price;
+                            total += productTotal;
+                        }
+                        @productTotal
+                        </td>
+                    </tr>
+            }
+            </tbody>
+        </table>
+        <h5>Sales amount: @total</h5>
+}
+else
+{
+    if (TempData.ContainsKey("WarningMessage"))
+    {
+        <div class="alert alert-warning">
+            @TempData["WarningMessage"]
+        </div>
+    }
+    else if (TempData.ContainsKey("ErrorMessage"))
+    {
+        <div class="alert alert-danger">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+}

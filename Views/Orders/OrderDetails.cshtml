@@ -100,7 +100,32 @@
     </dl>
 </div>
 
-<div style="display: flex; gap: 5px">
-    <a asp-action="OrdersPanel" class="btn btn-outline-primary">Return</a>
-    <a asp-action="Search" asp-route-userName="@Model?.User.UserName" class="btn btn-primary">Show all orders from this user</a>
-</div>
+
+<form id="searchForm" method="post">
+    <div style="display: flex; gap: 5px">
+        <a asp-action="OrdersPanel" class="btn btn-outline-primary">Return</a>
+        <input type="hidden" class="form-control" id="userName" name="userName" value="@Model?.User.UserName" />
+        <button type="button" class="btn btn-outline-primary" onclick="searchOrders()">Show all orders of this user</button>
+    </div>
+</form>
+
+<div id="searchResults"></div>
+
+<script>
+
+    function searchOrders() {
+        var formData = $('#searchForm').serialize();
+
+        $.ajax({
+            url: '@Url.Action("Search", "Orders")',
+            type: 'GET',
+            data: formData,
+            success: function (data) {
+                $('#searchResults').html(data);
+            },
+            error: function () {
+                alert('Error occurred while processing the request.');
+            }
+        });
+    }
+</script>

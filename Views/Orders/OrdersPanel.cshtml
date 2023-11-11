@@ -6,123 +6,42 @@
 
 <h1>All orders</h1>
 
-<form asp-controller="Orders" asp-action="Search" method="get">
+<form id="searchForm" method="post">
     <div class="form-group">
         <label for="orderId">Search by Order ID:</label>
-        <input type="number" class="form-control" id="orderId" name="orderId" />
+        <input type="number" class="form-control" style="width: 250px" id="orderId" name="orderId" />
     </div>
     <br />
     <div class="form-group">
         <label for="userName">Search by User Name:</label>
-        <input type="text" class="form-control" id="userName" name="userName" />
+        <input type="text" class="form-control" style="width: 250px" id="userName" name="userName" />
     </div>
     <br />
     <div class="d-flex">
-        <button type="submit" class="btn btn-primary" style="margin-right: 2px;">Search</button>
-        <a asp-action="OrdersPanel" class="btn btn-primary">Show all</a>
+        <button type="button" class="btn btn-outline-primary" onclick="searchOrders()">Search</button>
     </div>
 </form>
 
+<div id="searchResults"></div>
 
+<script>
+    $(document).ready(function () {
+        searchOrders();
+    });
 
-<br />
-@if (TempData.ContainsKey("ErrorMessage"))
-{
-    <div class="alert alert-danger">
-    @TempData["ErrorMessage"]
-    </div>
-}
+    function searchOrders() {
+        var formData = $('#searchForm').serialize();
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                <div>Order Number</div>
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.User.UserName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreationDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.OrderStatus)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.OnlinePayment)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PaymentStatus)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DeliveryDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Total)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Id)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.User.UserName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreationDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.OrderStatus)
-            </td>
-            <td>
-                    @if (item.OnlinePayment)
-                    {
-                        <text>Yes</text>
-                    }
-                    else
-                    {
-                        <text>No</text>
-                    }
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PaymentStatus)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DeliveryDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Total)
-            </td>
-            <td>
-                <div style="display: flex; gap: 5px">
-                    <a asp-action="OrderDetails" class="btn btn-outline-primary" asp-route-id="@item.Id">Details</a> 
-                    @if (item.OrderStatus == ComputerStore.Enums.OrderStatus.OnDelivery.ToString())
-                    {
-                        <form asp-controller="Orders" asp-action="ConfirmDelivery" method="post">
-                        <input type="hidden" name="id" value="@item.Id" />
-                        <input type="submit" class="btn btn-outline-secondary" value="Confirm delivery" />
-                    </form>
-                    }
-                    @if (item.OrderStatus != ComputerStore.Enums.OrderStatus.Completed.ToString()
-                        && item.OrderStatus != ComputerStore.Enums.OrderStatus.Canceled.ToString()
-                        && item.OrderStatus != ComputerStore.Enums.OrderStatus.OnDelivery.ToString())
-                    {
-                        <form asp-controller="Orders" asp-action="CompleteOrder" method="post">
-                            <input type="hidden" name="id" value="@item.Id" />
-                            <input type="submit" class="btn btn-outline-success" value="Complete" />
-                        </form>
-                        <form asp-controller="Orders" asp-action="CancelOrder" method="post">
-                            <input type="hidden" name="id" value="@item.Id" />
-                            <input type="submit" class="btn btn-outline-danger" value="Cancel" />
-                        </form>
-                    }
-                </div>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+        $.ajax({
+            url: '@Url.Action("Search", "Orders")',
+            type: 'GET',
+            data: formData,
+            success: function (data) {
+                $('#searchResults').html(data);
+            },
+            error: function () {
+                alert('Error occurred while processing the request.');
+            }
+        });
+    }
+</script>

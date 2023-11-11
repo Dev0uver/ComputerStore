@@ -9,6 +9,9 @@ using ComputerStore.Data;
 using ComputerStore.Models;
 using System.Security.Claims;
 using ComputerStore.Enums;
+using Microsoft.AspNetCore.Authorization;
+using System.Data;
+using Microsoft.AspNetCore.Routing;
 
 namespace ComputerStore.Controllers
 {
@@ -29,6 +32,8 @@ namespace ComputerStore.Controllers
                 .Include(p => p.Subcategory)
                 .Where(p => p.Availability == true)
                 .OrderBy(p => p.Id);
+
+            await GetCategoriesAndSubcategories();
             return View(await computerStoreContext.ToListAsync());
         }
 
@@ -52,6 +57,7 @@ namespace ComputerStore.Controllers
             return View(product);
         }
 
+        [Authorize(Roles = "Seller, Manager")]
         public async Task<IActionResult> ProductDetails(int? id)
         {
             if (id == null || _context.Products == null)
@@ -71,6 +77,7 @@ namespace ComputerStore.Controllers
             return View(product);
         }
 
+        [Authorize(Roles = "Seller, Manager")]
         // GET: Products/Create
         public IActionResult Create()
         {
@@ -83,6 +90,7 @@ namespace ComputerStore.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
+        [Authorize(Roles = "Seller, Manager")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Name,Description,Price,CategoryId,SubcategoryId,Availability,Amount")] Product product)
         {
@@ -106,6 +114,7 @@ namespace ComputerStore.Controllers
         }
 
         // GET: Products/Edit/5
+        [Authorize(Roles = "Seller, Manager")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || _context.Products == null)
@@ -127,6 +136,7 @@ namespace ComputerStore.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
+        [Authorize(Roles = "Seller, Manager")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,Price,CategoryId,SubcategoryId,Availability,Amount")] Product product)
         {
@@ -176,7 +186,7 @@ namespace ComputerStore.Controllers
         }
 
         [HttpGet]
-
+        [Authorize(Roles = "Seller, Manager")]
         public async Task<IActionResult> ProductsPanel()
         {
 
@@ -184,26 +194,28 @@ namespace ComputerStore.Controllers
                 .Include(p => p.Category)
                 .Include(p => p.Subcategory)
                 .OrderBy(p => p.Id);
+
+            await GetCategoriesAndSubcategories();
             return View(await computerStoreContext.ToListAsync());
         }
 
         [HttpGet]
-        public async Task<IActionResult> SalesTurnover(string firstDate, string secondDate)
+        public async Task<IActionResult> SalesTurnover()
+        {
+            return View();
+        }
+
+        [Authorize(Roles = "Manager")]
+        public async Task<IActionResult> CountSalesTurnover(string firstDate, string secondDate)
         {
             if (firstDate == null || secondDate == null)
             {
                 TempData["ErrorMessage"] = "Enter proper date!";
-                return RedirectToAction(nameof(ProductsPanel));
+                return PartialView("_SalesTurnoverTable");
             }
 
             var fDate = DateOnly.Parse(firstDate);
             var sDate = DateOnly.Parse(secondDate);
-
-            if (fDate > sDate)
-            {
-                TempData["ErrorMessage"] = "Start date can't be less than the end date!";
-                return RedirectToAction(nameof(ProductsPanel));
-            }
 
             var products = await _context.Products
                 .ToListAsync();
@@ -222,7 +234,7 @@ namespace ComputerStore.Controllers
             if (orders.Count == 0)
             {
                 TempData["WarningMessage"] = "Not a single product was sold during this period!";
-                return View("SalesTurnover");
+                return PartialView("_SalesTurnoverTable");
             }
 
             foreach (var order in orders)
@@ -241,11 +253,12 @@ namespace ComputerStore.Controllers
                     }
                 }
             }
-            var filteredList = productsDict.Values.ToList();
-            return View("SalesTurnover", filteredList);
+            var filteredProducts = productsDict.Values.ToList();
+
+            return PartialView("_SalesTurnoverTable", filteredProducts.OrderBy(p => p.Id));
         }
 
-
+        [Authorize(Roles = "Manager")]
         public async Task<IActionResult> StopSales(int id)
         {
             if (id == null || _context.Products == null)
@@ -267,6 +280,7 @@ namespace ComputerStore.Controllers
         }
 
         [HttpPost, ActionName("StopSales")]
+        [Authorize(Roles = "Manager")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> StopSalesConfirmed(int id)
         {
@@ -289,6 +303,84 @@ namespace ComputerStore.Controllers
             _context.Update(product);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(ProductsPanel));
+        }
+
+        [Authorize(Roles = "Seller, Manager")]
+        public IActionResult SearchCatalog(string productName, int? category, int? subcategory)
+        {
+            var products = _context.Products
+               .Include(p => p.Category)
+               .Include(p => p.Subcategory)
+               .Where(p => p.Availability == true && p.IsOnSale == true)
+               .AsQueryable();
+
+            if (!string.IsNullOrEmpty(productName))
+            {
+                products = products.Where(p => p.Name.Contains(productName));
+            }
+
+            if (category.HasValue)
+            {
+                products = products.Where(p => p.Category.Id == category);
+            }
+
+            if (subcategory.HasValue)
+            {
+                products = products.Where(p => p.Subcategory.Id == subcategory);
+            }
+
+            var filteredProducts = products.ToList();
+            if (filteredProducts.Count() == 0)
+            {
+                TempData["WarningMessage"] = "Nothing found, try to change search attributes!";
+                return PartialView("_SearchResults");
+            }
+
+            return PartialView("_ProductTable", filteredProducts.OrderBy(p => p.Id));
+        }
+
+        [Authorize(Roles = "Seller, Manager")]
+        public IActionResult SearchAll(string productName, int? category, int? subcategory)
+        {
+            var products = _context.Products
+               .Include(p => p.Category)
+               .Include(p => p.Subcategory)
+               .AsQueryable();
+
+            if (!string.IsNullOrEmpty(productName))
+            {
+                products = products.Where(p => p.Name.Contains(productName));
+            }
+
+            if (category.HasValue)
+            {
+                products = products.Where(p => p.Category.Id == category);
+            }
+
+            if (subcategory.HasValue)
+            {
+                products = products.Where(p => p.Subcategory.Id == subcategory);
+            }
+
+            var filteredProducts = products.ToList();
+            if (filteredProducts.Count() == 0)
+            {
+                TempData["WarningMessage"] = "Nothing found, try to change search attributes!";
+                return PartialView("_SearchResults");
+            }
+
+            return PartialView("_ProductTable", filteredProducts.OrderBy(p => p.Id));
+        }
+
+        public async Task<IActionResult> GetCategoriesAndSubcategories()
+        {
+            var categories = _context.Categories.Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Name }).ToList();
+            var subcategories = _context.Subcategories.Select(s => new SelectListItem { Value = s.Id.ToString(), Text = s.Name }).ToList();
+
+            ViewBag.Categories = categories;
+            ViewBag.Subcategories = subcategories;
+
+            return Json(new { Categories = categories, Subcategories = subcategories });
         }
     }
 }

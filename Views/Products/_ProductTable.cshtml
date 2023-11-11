@@ -1,0 +1,55 @@
+﻿@model IEnumerable<ComputerStore.Models.Product>
+
+@if (Model != null && Model.Count() > 0)
+{
+    @foreach (var item in Model)
+{
+        <tr>
+            <td>
+        @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td style="max-width: 200px;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+        @Html.DisplayFor(modelItem => item.Description)
+            </td>
+            <td>
+        @Html.DisplayFor(modelItem => item.Price)
+            </td>
+            <td>
+        @if (item.Availability)
+        {
+            <text>Available</text>
+        }
+        else
+        {
+            <text>Not Available</text>
+        }
+            </td>
+            <td>
+        @Html.DisplayFor(modelItem => item.Amount)
+            </td>
+            <td>
+        @Html.DisplayFor(modelItem => item.Category.Name)
+            </td>
+            <td>
+        @Html.DisplayFor(modelItem => item.Subcategory.Name)
+            </td>
+            <td>
+                <div style="display: flex; gap: 5px">
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-primary">Details</a>
+                    <form asp-controller="Carts" asp-action="AddToCart" method="post">
+                        <input type="hidden" name="id" value="@item.Id" />
+                        <input type="submit" class="btn btn-outline-dark" value="Add to cart" />
+                    </form>
+                </div>
+            </td>
+        </tr>
+    }
+}
+else {
+    if (TempData.ContainsKey("WarningMessage"))
+    {
+        <div class="alert alert-warning">
+    @TempData["WarningMessage"]
+        </div>
+    }
+}

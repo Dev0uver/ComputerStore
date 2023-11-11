@@ -1,4 +1,5 @@
 ﻿@model IEnumerable<ComputerStore.Models.Product>
+@using Microsoft.AspNetCore.Mvc.Rendering
 
 @{
     ViewData["Title"] = "Index";
@@ -6,7 +7,36 @@
 
 <h1>Product catalog</h1>
 
-<table class="table" sstyle="display: flex;">
+<form id="searchForm">
+    <div class="form-group">
+        <label for="productName">Search by Product Name:</label>
+        <input type="text" class="form-control" style="width: 250px" id="productName" name="productName" />
+    </div>
+    <div class="form-group">
+        <label for="category">Select Category:</label>
+        <select class="form-control" style="width: 250px" id="category" name="category">
+            <option value="">All Categories</option>
+            @foreach (var category in ViewBag.Categories as List<SelectListItem>)
+            {
+                    <option value="@category.Value">@category.Text</option>
+            }
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="subcategory">Select Subcategory:</label>
+        <select class="form-control" style="width: 250px" id="subcategory" name="subcategory">
+            <option value="">All Subcategories</option>
+            @foreach (var subcategory in ViewBag.Subcategories as List<SelectListItem>)
+            {
+                    <option value="@subcategory.Value">@subcategory.Text</option>
+            }
+        </select>
+    </div>
+    <br />
+    <button type="button" class="btn btn-outline-primary" onclick="searchCatalog()">Search</button>
+</form>
+
+<table class="table">
     <thead>
         <tr>
             <th>
@@ -33,47 +63,47 @@
             <th></th>
         </tr>
     </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td style="max-width: 200px;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                @Html.DisplayFor(modelItem => item.Description)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Price)
-            </td>
-            <td>
-                @if (item.Availability)
-                {
-                    <text>Available</text>
-                }
-                else
-                {
-                    <text>Not Available</text>
-                }
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Amount)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Category.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Subcategory.Name)
-            </td>
-            <td>
-                <div style="display: flex; gap: 5px">
-                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-primary">Details</a>
-                    <form asp-controller="Carts" asp-action="AddToCart" method="post">
-                        <input type="hidden" name="id" value="@item.Id" />
-                        <input type="submit" class="btn btn-outline-dark" value="Add to cart" />
-                    </form>
-                </div>
-            </td>
-        </tr>
-}
+    <tbody id="productTableBody">
     </tbody>
 </table>
+
+<script>
+    $(document).ready(function () {
+        loadCategoriesAndSubcategories();
+        searchCatalog();
+    });
+
+     function loadCategoriesAndSubcategories() {
+        $.ajax({
+            url: '@Url.Action("GetCategoriesAndSubcategories", "Products")',
+            type: 'GET',
+            success: function (data) {
+                $('#category').html(data.Categories);
+                $('#subcategory').html(data.Subcategories);
+            },
+            error: function () {
+                alert('Error occurred while loading categories and subcategories.');
+            }
+        });
+    }
+
+    function searchCatalog() {
+        var productName = $('#productName').val();
+        var category = $('#category').val();
+        var subcategory = $('#subcategory').val();
+
+        $.ajax({
+            url: '@Url.Action("SearchCatalog", "Products")',
+            type: 'GET',
+            data: { productName: productName,
+            category: category,
+            subcategory: subcategory },
+            success: function (data) {
+                $('#productTableBody').html(data);
+            },
+            error: function () {
+                alert('Error occurred while processing the request.');
+            }
+        });
+    }
+</script>

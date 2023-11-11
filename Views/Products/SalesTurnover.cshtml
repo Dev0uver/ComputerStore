@@ -1,48 +1,40 @@
-﻿@model List<Product>
+﻿@model IEnumerable<ComputerStore.Models.Product>
 
 <h2>Sales Turnover</h2>
-@{
-    long total = 0;
-}
-@if (Model != null && Model.Count > 0)
-{
-    int productTotal = 0;
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Product Name</th>
-                <th>Amount Sold</th>
-                <th>The amount of product sales</th>
-            </tr>
-        </thead>
-        <tbody>
-        @foreach (var product in Model)
-        {
-                productTotal = 0;
-                <tr>
-                <td>@product.Name</td>
-                <td>@product.Amount</td>
-                <td>@{
-                        productTotal += product.Amount * product.Price;
-                        total += productTotal;
-                    }
-                    @productTotal
-                </td>
-            </tr>
-        }
-        </tbody>
-    </table>
-    <h5>Sales amount: @total</h5>
-}
-else
-{
 
-    if (TempData.ContainsKey("WarningMessage"))
-    {
-        <div class="alert alert-warning">
-            @TempData["WarningMessage"]
+@if (User.IsInRole("Manager"))
+{
+        <div>
+            <label for="firstDate">Start Date:</label>
+            <input type="date" id="firstDate" class="form-control" style="width: 150px" name="firstDate" />
+
+            <label for="secondDate">End Date:</label>
+            <input type="date" id="secondDate" class="form-control" style="width: 150px" name="secondDate" />
+            <br />
+            <button class="btn btn-outline-dark" onclick="showSalesTurnover()">Show sales turnover</button>
         </div>
-    }
-        
 }
+<br />
+<div id="salesTurnoverTable">
+</div>
+
 <a asp-action="ProductsPanel" class="btn btn-outline-primary">Return</a>
+
+<script>
+    function showSalesTurnover() {
+        var firstDate = $('#firstDate').val();
+        var secondDate = $('#secondDate').val();
+
+        $.ajax({
+            url: '@Url.Action("CountSalesTurnover", "Products")',
+            type: 'get',
+            data: { firstDate: firstDate, secondDate: secondDate },
+            success: function (data) {
+                $('#salesTurnoverTable').html(data);
+            },
+            error: function () {
+                alert('Error occurred while processing the request.');
+            }
+        });
+    }
+</script>

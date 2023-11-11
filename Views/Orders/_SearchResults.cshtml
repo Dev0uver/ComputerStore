@@ -1,0 +1,107 @@
+﻿@model IEnumerable<ComputerStore.Models.Order>;
+
+@if (Model != null && Model.Count() > 0)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    <div>Order Number</div>
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.User.UserName)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.CreationDate)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.OrderStatus)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.OnlinePayment)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.PaymentStatus)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.DeliveryDate)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Total)
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                    @Html.DisplayFor(modelItem => item.Id)
+                    </td>
+                    <td>
+                    @Html.DisplayFor(modelItem => item.User.UserName)
+                    </td>
+                    <td>
+                    @Html.DisplayFor(modelItem => item.CreationDate)
+                    </td>
+                    <td>
+                    @Html.DisplayFor(modelItem => item.OrderStatus)
+                    </td>
+                    <td>
+                    @if (item.OnlinePayment)
+                    {
+                        <text>Yes</text>
+                    }
+                    else
+                    {
+                        <text>No</text>
+                    }
+                    </td>
+                    <td>
+                    @Html.DisplayFor(modelItem => item.PaymentStatus)
+                    </td>
+                    <td>
+                    @Html.DisplayFor(modelItem => item.DeliveryDate)
+                    </td>
+                    <td>
+                    @Html.DisplayFor(modelItem => item.Total)
+                    </td>
+                    <td>
+                        <div style="display: flex; gap: 5px">
+                            <a asp-action="OrderDetails" class="btn btn-outline-primary" asp-route-id="@item.Id">Details</a> 
+                        @if (item.OrderStatus == ComputerStore.Enums.OrderStatus.OnDelivery.ToString())
+                        {
+                            <form asp-controller="Orders" asp-action="ConfirmDelivery" method="post">
+                                <input type="hidden" name="id" value="@item.Id" />
+                                <input type="submit" class="btn btn-outline-secondary" value="Confirm delivery" />
+                            </form>
+                        }
+                        @if (item.OrderStatus != ComputerStore.Enums.OrderStatus.Completed.ToString()
+                            && item.OrderStatus != ComputerStore.Enums.OrderStatus.Canceled.ToString()
+                            && item.OrderStatus != ComputerStore.Enums.OrderStatus.OnDelivery.ToString())
+                        {
+                            <form asp-controller="Orders" asp-action="CompleteOrder" method="post">
+                                <input type="hidden" name="id" value="@item.Id" />
+                                <input type="submit" class="btn btn-outline-success" value="Complete" />
+                            </form>
+                            <form asp-controller="Orders" asp-action="CancelOrder" method="post">
+                                <input type="hidden" name="id" value="@item.Id" />
+                                <input type="submit" class="btn btn-outline-danger" value="Cancel" />
+                            </form>
+                        }
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else {
+    if (TempData.ContainsKey("WarningMessage"))
+    {
+        <div class="alert alert-warning">
+            @TempData["WarningMessage"]
+        </div>
+    }
+}

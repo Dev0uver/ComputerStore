@@ -9,9 +9,11 @@ using ComputerStore.Data;
 using ComputerStore.Models;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ComputerStore.Controllers
 {
+    [Authorize]
     public class CartsController : Controller
     {
         private readonly ComputerStoreContext _context;

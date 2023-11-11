@@ -11,9 +11,11 @@ using System.Security.Claims;
 using Humanizer.Localisation.TimeToClockNotation;
 using Microsoft.AspNetCore.Http.HttpResults;
 using System.Reflection;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ComputerStore.Controllers
 {
+    [Authorize(Roles = "Manager")]
     public class VendorController : Controller
     {
         private readonly ComputerStoreContext _context;

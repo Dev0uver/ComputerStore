@@ -14,9 +14,11 @@ using ComputerStore.Enums;
 using System.Diagnostics;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ComputerStore.Controllers
 {
+    [Authorize]
     public class OrdersController : Controller
     {
         private readonly ComputerStoreContext _context;
@@ -58,6 +60,7 @@ namespace ComputerStore.Controllers
             return View(order);
         }
 
+        [Authorize(Roles = "Seller, Manager")]
         public async Task<IActionResult> OrderDetails(int? id)
         {
             if (id == null || _context.Orders == null)
@@ -215,17 +218,14 @@ namespace ComputerStore.Controllers
           return (_context.Orders?.Any(e => e.Id == id)).GetValueOrDefault();
         }
 
-        public async Task<IActionResult> OrdersPanel()
+        [Authorize(Roles = "Seller, Manager")]
+        public async Task<IActionResult> OrdersPanel(string userName)
         {
-            var computerStoreContext = _context.Orders
-                .Include(o => o.User)
-                .Include(o => o.OrderItems)
-                    .ThenInclude(oi => oi.Product)
-                .OrderBy(o => o.Id);
-            return View(await computerStoreContext.ToListAsync());
+            return View();
         }
 
         [HttpPost]
+        [Authorize(Roles = "Seller, Manager")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CompleteOrder(int id)
         {
@@ -243,6 +243,7 @@ namespace ComputerStore.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Seller, Manager")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ConfirmDelivery(int id)
         {
@@ -258,6 +259,7 @@ namespace ComputerStore.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Seller, Manager")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CancelOrder(int id)
         {
@@ -290,21 +292,17 @@ namespace ComputerStore.Controllers
             return RedirectToAction(nameof(OrdersPanel));
         }
 
+        [Authorize(Roles = "Seller, Manager")]
         public async Task<IActionResult> Search(int orderId, string userName)
         {
             var orders = _context.Orders
                 .Include(o => o.User)
                 .AsQueryable();
-            if (orderId <= 0 && userName == null)
-            {
-                TempData["ErrorMessage"] = "Error, both field are empty! Enter at least one!";
-                return RedirectToAction(nameof(OrdersPanel));
-            }
             if (orderId > 0)
             {
                 // Фильтрация по ID заказа
                 orders = orders
-                    .Where(o => o.Id == orderId)
+                    .Where(o => o.Id == orderId);
             }
             if (!string.IsNullOrEmpty(userName))
             {
@@ -312,16 +310,16 @@ namespace ComputerStore.Controllers
                 orders = orders
                     .Where(o => o.User.UserName.Contains(userName));
             }
-            if (orders == null)
+
+
+            var filteredOrders = orders.ToList();
+            if (filteredOrders.Count() == 0)
             {
-                TempData["ErrorMessage"] = "Order not found, check the search arguments and try again!";
-                return View();
+                TempData["WarningMessage"] = "Nothing found, try to change search attributes!";
+                return PartialView("_SearchResults");
             }
 
-            var filteredOrders = orders
-                .GroupBy(o => o.Id)
-                .ToList();
-            return View("OrdersPanel", filteredOrders);
+            return PartialView("_SearchResults", filteredOrders.OrderBy(o => o.Id));
         }
     }
 }
