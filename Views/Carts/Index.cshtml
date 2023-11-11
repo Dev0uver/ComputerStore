@@ -9,7 +9,7 @@
     {
         <form asp-controller="Carts" asp-action="DeleteAll" method="post">
             <input type="hidden" name="userId" value="@Model.ElementAt(0).UserId" />
-            <input type="submit" value="Clear cart" />
+            <input type="submit" class="btn btn-outline-danger" value="Clear cart" />
         </form>
     }
     else
@@ -63,19 +63,21 @@
                     }
                 </th>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                    <form asp-controller="Carts" asp-action="DeleteConfirmed" method="post">
-                        <input type="hidden" name="id" value="@item.Id" />
-                        <input type="submit" value="Delete" />
-                    </form>
+                    <div  style="display: flex; gap: 5px">
+                        <a asp-action="Edit" class="btn btn-outline-success" asp-route-id="@item.Id">Edit</a>
+                        <a asp-action="Details" class="btn btn-outline-primary" asp-route-id="@item.Id">Details</a>
+                        <form asp-controller="Carts" asp-action="DeleteConfirmed" method="post">
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <input type="submit" class="btn btn-outline-danger" value="Delete" />
+                        </form>
+                    </div>
                 </td>
             </tr>
         }
     </tbody>
 </table>
 @{
-    var total = 0;
+    long total = 0;
 }
 @foreach (var item in Model)
 {
@@ -88,8 +90,7 @@
     {
         <form asp-controller="Orders" asp-action="Create" method="get">
                     <input type="hidden" name="userId" value="@Model.ElementAt(0).UserId" />
-                    <input type="submit" value="Make order" />
+                    <input type="submit" class="btn btn-outline-primary" value="Make order" />
         </form>
     }
 }
-<a  asp-route-id=""></a>

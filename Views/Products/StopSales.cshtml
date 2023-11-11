@@ -1,11 +1,12 @@
 ﻿@model ComputerStore.Models.Product
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "StopSales";
 }
 
-<h1>Details</h1>
+<h1>Stop sales of a product</h1>
 
+<h3>Are you sure you want to stop sale this product?</h3>
 <div>
     <h4>Product</h4>
     <hr />
@@ -60,8 +61,10 @@
             @Html.DisplayFor(model => model.Subcategory.Name)
         </dd>
     </dl>
-</div>
-<br />
-<div>
-    <a asp-action="Index" class="btn btn-outline-primary">Back to List</a>
+    
+    <form asp-action="StopSales">
+        <input type="hidden" asp-for="Id" />
+        <input type="submit" value="StopSales" class="btn btn-outline-danger" /> |
+        <a asp-action="ProductsPanel">Back to List</a>
+    </form>
 </div>

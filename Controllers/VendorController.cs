@@ -29,6 +29,7 @@ namespace ComputerStore.Controllers
             var computerStoreContext = _context.Products
                 .Include(v => v.Category)
                 .Include(v => v.Subcategory)
+                .Where(v => v.IsOnSale == true)
                 .OrderBy(m => m.Id);
             return View(await computerStoreContext.ToListAsync());
         }

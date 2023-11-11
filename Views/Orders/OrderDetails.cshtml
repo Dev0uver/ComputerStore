@@ -5,7 +5,6 @@
 }
 
 <h1>Details</h1>
-
 <div>
     <h4>Order</h4>
     <hr />
@@ -100,8 +99,8 @@
         </dd>
     </dl>
 </div>
-<a asp-action="Search" asp-route-userName="@Model?.User.UserName" class="btn btn-primary">Show all orders from this user</a>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a>
-    <a asp-action="OrdersPanel">Back to List</a>
+
+<div style="display: flex; gap: 5px">
+    <a asp-action="OrdersPanel" class="btn btn-outline-primary">Return</a>
+    <a asp-action="Search" asp-route-userName="@Model?.User.UserName" class="btn btn-primary">Show all orders from this user</a>
 </div>

@@ -144,6 +144,7 @@ public partial class ComputerStoreContext : DbContext
                 .HasColumnName("name");
             entity.Property(e => e.Price).HasColumnName("price");
             entity.Property(e => e.SubcategoryId).HasColumnName("subcategoryId");
+            entity.Property(e => e.IsOnSale).HasColumnName("isOnSale");
 
             entity.HasOne(d => d.Category).WithMany(p => p.Products)
                 .HasForeignKey(d => d.CategoryId)

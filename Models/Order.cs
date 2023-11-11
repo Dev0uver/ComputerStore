@@ -15,7 +15,7 @@ public partial class Order
 
     public bool OnlinePayment { get; set; }
 
-    public int Total { get; set; }
+    public long Total { get; set; }
 
     public string UserId { get; set; } = null!;
     

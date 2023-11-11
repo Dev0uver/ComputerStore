@@ -1,0 +1,121 @@
+﻿@model IEnumerable<ComputerStore.Models.Product>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>All products</h1>
+@if (TempData.ContainsKey("ErrorMessage"))
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+<div>  
+    <form asp-controller="Products" asp-action="SalesTurnover" method="get">
+        <label for="firstDate">Start Date:</label>
+        <input type="date" id="firstDate" class="form-control" style="width: 150px" name="firstDate" />
+
+        <label for="secondDate">End Date:</label>
+        <input type="date" id="secondDate" class="form-control" style="width: 150px" name="secondDate" />
+        <br />
+        <input class="btn btn-outline-primary" type="submit" value="Show sales turnover" />
+    </form> 
+</div>
+
+<br />
+<br />
+<div>
+    <a asp-action="Create" class="btn btn-outline-success">Create New</a>
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Description)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Price)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Availability)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Amount)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Category)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Subcategory)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IsOnSale)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td style="max-width: 200px;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    @Html.DisplayFor(modelItem => item.Description)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Price)
+                </td>
+                <td>
+                    @if (item.Availability)
+                    {
+                        <text>Available</text>
+                    }
+                    else
+                    {
+                        <text>Not Available</text>
+                    }
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Amount)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Category.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Subcategory.Name)
+                </td>
+                <td>
+                    @if (item.IsOnSale)
+                    {
+                        <text>On sale</text>
+                    }
+                    else
+                    {
+                        <text>Sales stopped</text>
+                    }
+                </td>
+                @if (item.IsOnSale)
+                {
+                    <td>
+                        <div  style="display: flex; gap: 5px">
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-success">Edit</a>
+                            <a asp-action="ProductDetails" asp-route-id="@item.Id" class="btn btn-outline-primary">Details</a>
+                            <a asp-action="StopSales" asp-route-id="@item.Id" class="btn btn-outline-danger">WriteOff</a>
+                        </div>
+                    </td>
+                }
+                else
+                {
+                    <td></td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>

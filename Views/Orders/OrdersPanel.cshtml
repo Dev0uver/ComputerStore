@@ -23,6 +23,8 @@
     </div>
 </form>
 
+
+
 <br />
 @if (TempData.ContainsKey("ErrorMessage"))
 {
@@ -96,28 +98,29 @@
                 @Html.DisplayFor(modelItem => item.Total)
             </td>
             <td>
-                <a asp-action="OrderDetails" asp-route-id="@item.Id">Details</a> 
-                @if (item.OrderStatus == ComputerStore.Enums.OrderStatus.OnDelivery.ToString())
-                {
-                    <form asp-controller="Orders" asp-action="ConfirmDelivery" method="post">
-                    <input type="hidden" name="id" value="@item.Id" />
-                    <input type="submit" value="Confirm delivery" />
-                </form>
-                }
-                @if (item.OrderStatus != ComputerStore.Enums.OrderStatus.Confirmed.ToString()
-                    && item.OrderStatus != ComputerStore.Enums.OrderStatus.Canceled.ToString()
-                    && item.OrderStatus != ComputerStore.Enums.OrderStatus.OnDelivery.ToString())
-                {
-                    <form asp-controller="Orders" asp-action="ConfirmOrder" method="post">
+                <div style="display: flex; gap: 5px">
+                    <a asp-action="OrderDetails" class="btn btn-outline-primary" asp-route-id="@item.Id">Details</a> 
+                    @if (item.OrderStatus == ComputerStore.Enums.OrderStatus.OnDelivery.ToString())
+                    {
+                        <form asp-controller="Orders" asp-action="ConfirmDelivery" method="post">
                         <input type="hidden" name="id" value="@item.Id" />
-                        <input type="submit" value="Confirm" />
+                        <input type="submit" class="btn btn-outline-secondary" value="Confirm delivery" />
                     </form>
-                    <form asp-controller="Orders" asp-action="CancelOrder" method="post">
-                        <input type="hidden" name="id" value="@item.Id" />
-                        <input type="submit" value="Cancel" />
-                    </form>
-                }
-                
+                    }
+                    @if (item.OrderStatus != ComputerStore.Enums.OrderStatus.Completed.ToString()
+                        && item.OrderStatus != ComputerStore.Enums.OrderStatus.Canceled.ToString()
+                        && item.OrderStatus != ComputerStore.Enums.OrderStatus.OnDelivery.ToString())
+                    {
+                        <form asp-controller="Orders" asp-action="CompleteOrder" method="post">
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <input type="submit" class="btn btn-outline-success" value="Complete" />
+                        </form>
+                        <form asp-controller="Orders" asp-action="CancelOrder" method="post">
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <input type="submit" class="btn btn-outline-danger" value="Cancel" />
+                        </form>
+                    }
+                </div>
             </td>
         </tr>
 }

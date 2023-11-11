@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using ComputerStore.Data;
 using ComputerStore.Models;
 using System.Security.Claims;
+using ComputerStore.Enums;
 
 namespace ComputerStore.Controllers
 {
@@ -51,6 +52,25 @@ namespace ComputerStore.Controllers
             return View(product);
         }
 
+        public async Task<IActionResult> ProductDetails(int? id)
+        {
+            if (id == null || _context.Products == null)
+            {
+                return NotFound();
+            }
+
+            var product = await _context.Products
+                .Include(p => p.Category)
+                .Include(p => p.Subcategory)
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            return View(product);
+        }
+
         // GET: Products/Create
         public IActionResult Create()
         {
@@ -74,6 +94,8 @@ namespace ComputerStore.Controllers
 
             if (ModelState.IsValid)
             {
+                product.Availability = true;
+                product.IsOnSale = true;
                 _context.Add(product);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -123,6 +145,10 @@ namespace ComputerStore.Controllers
             {
                 try
                 {
+                    if (product.Amount == 0)
+                    {
+                        product.Availability = false;
+                    }
                     _context.Update(product);
                     await _context.SaveChangesAsync();
                 }
@@ -144,8 +170,83 @@ namespace ComputerStore.Controllers
             return View(product);
         }
 
-        // GET: Products/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        private bool ProductExists(int id)
+        {
+            return (_context.Products?.Any(e => e.Id == id)).GetValueOrDefault();
+        }
+
+        [HttpGet]
+
+        public async Task<IActionResult> ProductsPanel()
+        {
+
+            var computerStoreContext = _context.Products
+                .Include(p => p.Category)
+                .Include(p => p.Subcategory)
+                .OrderBy(p => p.Id);
+            return View(await computerStoreContext.ToListAsync());
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> SalesTurnover(string firstDate, string secondDate)
+        {
+            if (firstDate == null || secondDate == null)
+            {
+                TempData["ErrorMessage"] = "Enter proper date!";
+                return RedirectToAction(nameof(ProductsPanel));
+            }
+
+            var fDate = DateOnly.Parse(firstDate);
+            var sDate = DateOnly.Parse(secondDate);
+
+            if (fDate > sDate)
+            {
+                TempData["ErrorMessage"] = "Start date can't be less than the end date!";
+                return RedirectToAction(nameof(ProductsPanel));
+            }
+
+            var products = await _context.Products
+                .ToListAsync();
+            Dictionary<int, Product> productsDict = new Dictionary<int, Product>();
+
+            foreach (var item in products)
+            {
+                item.Amount = 0;
+                productsDict[item.Id] = item;
+            }
+
+            var orders = await _context.Orders
+                .Where(o => o.DeliveryDate >= fDate && o.DeliveryDate <= sDate && o.OrderStatus == OrderStatus.Completed.ToString())
+                .ToListAsync();
+
+            if (orders.Count == 0)
+            {
+                TempData["WarningMessage"] = "Not a single product was sold during this period!";
+                return View("SalesTurnover");
+            }
+
+            foreach (var order in orders)
+            {
+                var orderItems = await _context.OrderItems
+                    .Where(oi => oi.OrderNumber == order.Id)
+                    .ToListAsync();
+                foreach (var item in orderItems)
+                {
+                    var product = _context.Products
+                        .Where(p => p.Id == item.ProductId)
+                        .FirstOrDefault();
+                    if (productsDict.ContainsKey(product.Id))
+                    {
+                        productsDict[product.Id].Amount += item.Amount;
+                    }
+                }
+            }
+            var filteredList = productsDict.Values.ToList();
+            return View("SalesTurnover", filteredList);
+        }
+
+
+        public async Task<IActionResult> StopSales(int id)
         {
             if (id == null || _context.Products == null)
             {
@@ -156,6 +257,7 @@ namespace ComputerStore.Controllers
                 .Include(p => p.Category)
                 .Include(p => p.Subcategory)
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (product == null)
             {
                 return NotFound();
@@ -164,28 +266,29 @@ namespace ComputerStore.Controllers
             return View(product);
         }
 
-        // POST: Products/Delete/5
-        [HttpPost, ActionName("Delete")]
+        [HttpPost, ActionName("StopSales")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> StopSalesConfirmed(int id)
         {
             if (_context.Products == null)
             {
                 return Problem("Entity set 'ComputerStoreContext.Products'  is null.");
             }
+
             var product = await _context.Products.FindAsync(id);
+
             if (product != null)
             {
                 _context.Products.Remove(product);
             }
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
+            product.IsOnSale = false;
+            product.Availability = false;
+            product.Amount = 0;
 
-        private bool ProductExists(int id)
-        {
-            return (_context.Products?.Any(e => e.Id == id)).GetValueOrDefault();
+            _context.Update(product);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(ProductsPanel));
         }
     }
 }

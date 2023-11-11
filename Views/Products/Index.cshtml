@@ -6,10 +6,7 @@
 
 <h1>Product catalog</h1>
 
-<p>
-    <a asp-action="Create" class="btn btn-outline-success">Create New</a>
-</p>
-<table class="table">
+<table class="table" sstyle="display: flex;">
     <thead>
         <tr>
             <th>
@@ -42,7 +39,7 @@
             <td>
                 @Html.DisplayFor(modelItem => item.Name)
             </td>
-            <td>
+            <td style="max-width: 200px;white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                 @Html.DisplayFor(modelItem => item.Description)
             </td>
             <td>
@@ -67,14 +64,14 @@
             <td>
                 @Html.DisplayFor(modelItem => item.Subcategory.Name)
             </td>
-            <td style="display: flex; gap: 5px">
-                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-success">Edit</a>
-                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-primary">Details</a>
-                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger">Delete</a>
-                <form asp-controller="Carts" asp-action="AddToCart" method="post">
-                    <input type="hidden" name="id" value="@item.Id" />
-                    <input type="submit" class="btn btn-outline-dark" value="Add to cart" />
-                </form>
+            <td>
+                <div style="display: flex; gap: 5px">
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-primary">Details</a>
+                    <form asp-controller="Carts" asp-action="AddToCart" method="post">
+                        <input type="hidden" name="id" value="@item.Id" />
+                        <input type="submit" class="btn btn-outline-dark" value="Add to cart" />
+                    </form>
+                </div>
             </td>
         </tr>
 }

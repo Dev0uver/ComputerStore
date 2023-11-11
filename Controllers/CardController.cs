@@ -20,10 +20,18 @@ public class CardController : Controller
     {
         if (ModelState.IsValid)
         {
+            var rand = new Random();
             var order = Temp.Order;
             Temp.Order = null;
-            order.PaymentStatus = OrderPaymentStatus.Paid.ToString();
-            return RedirectToAction("Create1", "Orders", order);
+            if (rand.Next(3) == 0) {
+                TempData["ErrorMessage"] = "Payment error, insufficient funds! Try again!";
+                return RedirectToAction("CardInput", Temp.Order);
+            }
+            else
+            {
+                order.PaymentStatus = OrderPaymentStatus.Paid.ToString();
+                return RedirectToAction("Create1", "Orders", order);
+            }
         }
         else
         { 
