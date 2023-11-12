@@ -13,7 +13,7 @@
     <div class="form-group">
         <label for="category">Select Category:</label>
         <select class="form-control" style="width: 250px" id="category" name="category">
-            <option value="">All Categories</option>
+            <option value="" selected>All categories</option>
             @foreach (var category in ViewBag.Categories as List<SelectListItem>)
             {
                         <option value="@category.Value">@category.Text</option>
@@ -23,7 +23,7 @@
     <div class="form-group">
         <label for="subcategory">Select Subcategory:</label>
         <select class="form-control" style="width: 250px" id="subcategory" name="subcategory">
-            <option value="">All Subcategories</option>
+            <option value="" selected>All subcategories</option>
             @foreach (var subcategory in ViewBag.Subcategories as List<SelectListItem>)
             {
                         <option value="@subcategory.Value">@subcategory.Text</option>
@@ -39,48 +39,40 @@
     <a asp-action="SalesTurnover" class="btn btn-outline-primary">Sales turnover</a>
 </div>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Description)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Price)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Availability)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Amount)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Category)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Subcategory)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IsOnSale)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody id="productTableBody">
- 
-    </tbody>
+<br />
+<table class="table" id="productTable">
 </table>
 
 <script>
     $(document).ready(function () {
         loadCategoriesAndSubcategories();
         searchAll();
+        $('#category').change(function () {
+            var selectedCategoryId = $(this).val();
+
+            $('#subcategory').empty();
+            $('#subcategory').append($('<option>').text('All Subcategories').attr('value', ''));
+
+            if (selectedCategoryId) {
+                $.ajax({
+                    url: '@Url.Action("GetSubcategoriesByCategory", "Products")',
+                    type: 'GET',
+                    data: { categoryId: selectedCategoryId },
+                    success: function (data) {
+                        $.each(data, function (i, item) {
+                            $('#subcategory').append($('<option>').text(item.text).attr('value', item.value));
+                        });
+                    },
+                    error: function () {
+                        alert('Error occurred while loading subcategories.');
+                    }
+                });
+            }
+        });
+        $('#category').trigger('change');
     });
 
-     function loadCategoriesAndSubcategories() {
+    function loadCategoriesAndSubcategories() {
         $.ajax({
             url: '@Url.Action("GetCategoriesAndSubcategories", "Products")',
             type: 'GET',
@@ -99,6 +91,14 @@
         var category = $('#category').val();
         var subcategory = $('#subcategory').val();
 
+        if (subcategory === "") {
+            subcategory = null;
+        }
+
+        if (category === "") {
+            category = null;
+        }
+
         $.ajax({
             url: '@Url.Action("SearchAll", "Products")',
             type: 'GET',
@@ -106,7 +106,7 @@
             category: category,
             subcategory: subcategory },
             success: function (data) {
-                $('#productTableBody').html(data);
+                $('#productTable').html(data);
             },
             error: function () {
                 alert('Error occurred while processing the request.');

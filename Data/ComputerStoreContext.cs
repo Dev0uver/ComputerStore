@@ -137,10 +137,10 @@ public partial class ComputerStoreContext : DbContext
             entity.Property(e => e.CategoryId)
                 .HasColumnName("categoryId");
             entity.Property(e => e.Description)
-                .HasMaxLength(500)
+                .HasMaxLength(5000)
                 .HasColumnName("description");
             entity.Property(e => e.Name)
-                .HasMaxLength(30)
+                .HasMaxLength(500)
                 .HasColumnName("name");
             entity.Property(e => e.Price).HasColumnName("price");
             entity.Property(e => e.SubcategoryId).HasColumnName("subcategoryId");
@@ -166,6 +166,12 @@ public partial class ComputerStoreContext : DbContext
             entity.Property(e => e.Name)
                 .HasMaxLength(50)
                 .HasColumnName("name");
+            entity.Property(e => e.CategoryId).HasColumnName("categoryId");
+
+            entity.HasOne(d => d.Category).WithMany(p => p.Subcategories)
+               .HasForeignKey(d => d.CategoryId)
+               .OnDelete(DeleteBehavior.ClientSetNull)
+               .HasConstraintName("categoryIdKey");
         });
 
         modelBuilder.Entity<User>(entity =>

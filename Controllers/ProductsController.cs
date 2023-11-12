@@ -100,13 +100,25 @@ namespace ComputerStore.Controllers
                 return RedirectToAction(nameof(Create));
             }
 
+            if (product.Name.Length > 500)
+            {
+                TempData["ErrorMessage"] = "Name length is too long!";
+                return RedirectToAction(nameof(Create));
+            }
+
+            if (product.Description.Length > 5000)
+            {
+                TempData["ErrorMessage"] = "Description length is too long!";
+                return RedirectToAction(nameof(Create));
+            }
+
             if (ModelState.IsValid)
             {
                 product.Availability = true;
                 product.IsOnSale = true;
                 _context.Add(product);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(ProductsPanel));
             }
             ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name", product.CategoryId);
             ViewData["SubcategoryId"] = new SelectList(_context.Subcategories, "Id", "Name", product.SubcategoryId);
@@ -306,7 +318,7 @@ namespace ComputerStore.Controllers
         }
 
         [Authorize(Roles = "Seller, Manager")]
-        public IActionResult SearchCatalog(string productName, int? category, int? subcategory)
+        public IActionResult SearchCatalog(string? productName, int? category, int? subcategory)
         {
             var products = _context.Products
                .Include(p => p.Category)
@@ -328,19 +340,23 @@ namespace ComputerStore.Controllers
             {
                 products = products.Where(p => p.Subcategory.Id == subcategory);
             }
+            else if (subcategory == null && category.HasValue)
+            {
+                products = products.Where(p => p.Subcategory.CategoryId == category);
+            }
 
             var filteredProducts = products.ToList();
             if (filteredProducts.Count() == 0)
             {
                 TempData["WarningMessage"] = "Nothing found, try to change search attributes!";
-                return PartialView("_SearchResults");
+                return PartialView("_ProductTable");
             }
 
             return PartialView("_ProductTable", filteredProducts.OrderBy(p => p.Id));
         }
 
         [Authorize(Roles = "Seller, Manager")]
-        public IActionResult SearchAll(string productName, int? category, int? subcategory)
+        public IActionResult SearchAll(string? productName, int? category, int? subcategory)
         {
             var products = _context.Products
                .Include(p => p.Category)
@@ -361,15 +377,19 @@ namespace ComputerStore.Controllers
             {
                 products = products.Where(p => p.Subcategory.Id == subcategory);
             }
+            else if (subcategory == null && category.HasValue)
+            {
+                products = products.Where(p => p.Subcategory.CategoryId == category);
+            }
 
             var filteredProducts = products.ToList();
             if (filteredProducts.Count() == 0)
             {
                 TempData["WarningMessage"] = "Nothing found, try to change search attributes!";
-                return PartialView("_SearchResults");
+                return PartialView("_AllProductTable");
             }
 
-            return PartialView("_ProductTable", filteredProducts.OrderBy(p => p.Id));
+            return PartialView("_AllProductTable", filteredProducts.OrderBy(p => p.Id));
         }
 
         public async Task<IActionResult> GetCategoriesAndSubcategories()
@@ -381,6 +401,16 @@ namespace ComputerStore.Controllers
             ViewBag.Subcategories = subcategories;
 
             return Json(new { Categories = categories, Subcategories = subcategories });
+        }
+
+        public JsonResult GetSubcategoriesByCategory(int categoryId)
+        {
+            var subcategories = _context.Subcategories
+                .Where(s => s.CategoryId == categoryId)
+                .Select(s => new { value = s.Id, text = s.Name })
+                .ToList();
+
+            return Json(subcategories);
         }
     }
 }

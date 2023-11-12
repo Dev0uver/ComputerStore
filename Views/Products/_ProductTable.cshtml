@@ -2,8 +2,32 @@
 
 @if (Model != null && Model.Count() > 0)
 {
+    <thead>
+        <tr>
+            <th>
+            @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.Description)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.Price)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.Amount)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.Category)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.Subcategory)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
     @foreach (var item in Model)
-{
+    {
         <tr>
             <td>
         @Html.DisplayFor(modelItem => item.Name)
@@ -13,16 +37,6 @@
             </td>
             <td>
         @Html.DisplayFor(modelItem => item.Price)
-            </td>
-            <td>
-        @if (item.Availability)
-        {
-            <text>Available</text>
-        }
-        else
-        {
-            <text>Not Available</text>
-        }
             </td>
             <td>
         @Html.DisplayFor(modelItem => item.Amount)
@@ -44,12 +58,14 @@
             </td>
         </tr>
     }
+    </tbody>
 }
 else {
     if (TempData.ContainsKey("WarningMessage"))
     {
+        <br />
         <div class="alert alert-warning">
-    @TempData["WarningMessage"]
+            @TempData["WarningMessage"]
         </div>
     }
 }

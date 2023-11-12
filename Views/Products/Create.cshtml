@@ -14,9 +14,9 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             @if (TempData.ContainsKey("ErrorMessage"))
             {
-                <div class="alert alert-danger">
+                    <div class="alert alert-danger">
                     @TempData["ErrorMessage"]
-                </div>
+                    </div>
             }
             <div class="form-group">
                 <label asp-for="Name" class="control-label"></label>
@@ -35,11 +35,11 @@
             </div>
             <div class="form-group">
                 <label asp-for="CategoryId" class="control-label"></label>
-                <select asp-for="CategoryId" class ="form-control" asp-items="ViewBag.CategoryId"></select>
+                <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.CategoryId"></select>
             </div>
             <div class="form-group">
                 <label asp-for="SubcategoryId" class="control-label"></label>
-                <select asp-for="SubcategoryId" class ="form-control" asp-items="ViewBag.SubcategoryId"></select>
+                <select asp-for="SubcategoryId" class="form-control" asp-items="ViewBag.SubcategoryId"></select>
             </div>
             <div class="form-group">
                 <label asp-for="Amount" class="control-label"></label>
@@ -49,12 +49,40 @@
             <br />
             <div class="form-group" style="display: flex; gap: 5px">
                 <input type="submit" value="Create" class="btn btn-outline-success" />
-                <a asp-action="Index" class="btn btn-outline-primary">Back to List</a>
+                <a asp-action="ProductsPanel" class="btn btn-outline-primary">Back to List</a>
             </div>
         </form>
     </div>
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+        <script>
+            $(document).ready(function () {
+                $('#CategoryId').change(function () {
+                    var selectedCategoryId = $(this).val();
+
+                    $('#SubcategoryId').empty();
+
+                    if (selectedCategoryId) {
+                        $.ajax({
+                            url: '@Url.Action("GetSubcategoriesByCategory", "Products")',
+                            type: 'GET',
+                            data: { categoryId: selectedCategoryId },
+                            success: function (data) {
+                                $.each(data, function (i, item) {
+                                    $('#SubcategoryId').append($('<option>').text(item.text).attr('value', item.value));
+                                });
+                            },
+                            error: function () {
+                                alert('Error occurred while loading subcategories.');
+                            }
+                        });
+                    }
+                });
+                $('#CategoryId').trigger('change');
+            });
+        </script>
 }

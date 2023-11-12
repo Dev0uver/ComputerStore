@@ -304,6 +304,11 @@ namespace ComputerStore.Controllers
                 orders = orders
                     .Where(o => o.Id == orderId);
             }
+            else if (orderId < 0)
+            {
+                TempData["WarningMessage"] = "Nothing found, try to change search attributes!";
+                return PartialView("_SearchResults");
+            }
             if (!string.IsNullOrEmpty(userName))
             {
                 // Фильтрация по имени пользователя
