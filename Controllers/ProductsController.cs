@@ -317,7 +317,6 @@ namespace ComputerStore.Controllers
             return RedirectToAction(nameof(ProductsPanel));
         }
 
-        [Authorize(Roles = "Seller, Manager")]
         public IActionResult SearchCatalog(string? productName, int? category, int? subcategory)
         {
             var products = _context.Products

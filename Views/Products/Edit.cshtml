@@ -67,4 +67,30 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+        <script>
+            $(document).ready(function () {
+                $('#CategoryId').change(function () {
+                    var selectedCategoryId = $(this).val();
+
+                    $('#SubcategoryId').empty();
+
+                    if (selectedCategoryId) {
+                        $.ajax({
+                            url: '@Url.Action("GetSubcategoriesByCategory", "Products")',
+                            type: 'GET',
+                            data: { categoryId: selectedCategoryId },
+                            success: function (data) {
+                                $.each(data, function (i, item) {
+                                    $('#SubcategoryId').append($('<option>').text(item.text).attr('value', item.value));
+                                });
+                            },
+                            error: function () {
+                                alert('Error occurred while loading subcategories.');
+                            }
+                        });
+                    }
+                });
+                $('#CategoryId').trigger('change');
+            });
+        </script>
 }

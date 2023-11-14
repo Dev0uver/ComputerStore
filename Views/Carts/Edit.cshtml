@@ -74,15 +74,12 @@
                 <span asp-validation-for="Amount" class="text-danger"></span>
             </div>
             <br />
-            <div class="form-group">
+            <div class="form-group" style="display: flex; gap: 5px">
                 <input type="submit" value="Save" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-outline-primary">Return</a>
             </div>
         </form>
     </div>
-</div>
-
-<div>
-    <a asp-action="Index" class="btn btn-outline-primary">Return</a>
 </div>
 
 @section Scripts {
