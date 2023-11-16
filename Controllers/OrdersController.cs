@@ -97,8 +97,11 @@ namespace ComputerStore.Controllers
                     .FirstOrDefaultAsync(p => p.Id == item.ProductId);
                 if (product == null)
                 {
-
                     return NotFound();
+                }
+                else if (cartItems.Count() < 1)
+                {
+                    return RedirectToAction(nameof(Index), "Carts");
                 }
                 else if (!product.Availability)
                 {
@@ -313,7 +316,7 @@ namespace ComputerStore.Controllers
             {
                 // Фильтрация по имени пользователя
                 orders = orders
-                    .Where(o => o.User.UserName.Contains(userName));
+                    .Where(o => o.User.UserName.ToLower().Contains(userName.ToLower().ToLower()));
             }
 
 

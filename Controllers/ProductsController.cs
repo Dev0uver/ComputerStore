@@ -327,7 +327,7 @@ namespace ComputerStore.Controllers
 
             if (!string.IsNullOrEmpty(productName))
             {
-                products = products.Where(p => p.Name.Contains(productName));
+                products = products.Where(p => p.Name.ToLower().Contains(productName.ToLower()));
             }
 
             if (category.HasValue)
@@ -364,7 +364,7 @@ namespace ComputerStore.Controllers
 
             if (!string.IsNullOrEmpty(productName))
             {
-                products = products.Where(p => p.Name.Contains(productName));
+                products = products.Where(p => p.Name.ToLower().Contains(productName.ToLower()));
             }
 
             if (category.HasValue)
