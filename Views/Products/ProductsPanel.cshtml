@@ -36,7 +36,10 @@
 <br />
 <div>
     <a asp-action="Create" class="btn btn-outline-success">Create New</a>
-    <a asp-action="SalesTurnover" class="btn btn-outline-primary">Sales turnover</a>
+    @if (User.IsInRole("Manager"))
+    {
+        <a asp-action="SalesTurnover" class="btn btn-outline-primary">Sales turnover</a>
+    }
 </div>
 
 <br />
