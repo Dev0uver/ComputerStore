@@ -351,7 +351,7 @@ namespace ComputerStore.Controllers
                 return PartialView("_ProductTable");
             }
 
-            return PartialView("_ProductTable", filteredProducts.OrderBy(p => p.Id));
+            return PartialView("_ProductTable", filteredProducts.OrderBy(p => p.CategoryId).ThenBy(p => p.SubcategoryId).ThenBy(p => p.Id));
         }
 
         [Authorize(Roles = "Seller, Manager")]
@@ -388,7 +388,7 @@ namespace ComputerStore.Controllers
                 return PartialView("_AllProductTable");
             }
 
-            return PartialView("_AllProductTable", filteredProducts.OrderBy(p => p.Id));
+            return PartialView("_AllProductTable", filteredProducts.OrderBy(p => p.CategoryId).ThenBy(p => p.SubcategoryId).ThenBy(p => p.Id));
         }
 
         public async Task<IActionResult> GetCategoriesAndSubcategories()

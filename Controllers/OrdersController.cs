@@ -303,7 +303,6 @@ namespace ComputerStore.Controllers
                 .AsQueryable();
             if (orderId > 0)
             {
-                // Фильтрация по ID заказа
                 orders = orders
                     .Where(o => o.Id == orderId);
             }
@@ -314,7 +313,6 @@ namespace ComputerStore.Controllers
             }
             if (!string.IsNullOrEmpty(userName))
             {
-                // Фильтрация по имени пользователя
                 orders = orders
                     .Where(o => o.User.UserName.ToLower().Contains(userName.ToLower().ToLower()));
             }
