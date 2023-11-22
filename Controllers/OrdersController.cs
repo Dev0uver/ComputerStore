@@ -277,6 +277,10 @@ namespace ComputerStore.Controllers
             {
                 var product = await _context.Products
                     .FirstOrDefaultAsync(p => p.Id == item.ProductId);
+                if(product.IsOnSale == false)
+                {
+                    continue;
+                }
 
                 if (product.Availability == false)
                 {
